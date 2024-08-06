@@ -1,5 +1,12 @@
 package service
 
+import (
+	"context"
+	"github.com/tizor98/genpass/repository"
+)
+
 func IsAuth() (bool, bool) {
-    return false, false
+	useRepo := repository.UserRepository(context.Background())
+	useRepo.GetUserByUsername("hola")
+	return false, false
 }
