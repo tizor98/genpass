@@ -79,7 +79,7 @@ func initDatabase() {
 	if _, err := db.Exec(`
         CREATE TABLE IF NOT EXISTS passwords (
             id INTEGER PRIMARY KEY,
-            target VARCHAR NOT NULL,
+            for_entity VARCHAR NOT NULL,
             password VARCHAR NOT NULL,
             userId INTEGER NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
