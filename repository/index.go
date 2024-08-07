@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
+	_ "modernc.org/sqlite"
 	"os"
 	"path"
 )
@@ -44,7 +44,7 @@ func getDb(ctx context.Context) *sql.DB {
 
 	dbPath := path.Join(dir, dbDir, dbName)
 
-	dataBase, err := sql.Open("sqlite3", dbPath)
+	dataBase, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,6 +60,7 @@ func initDatabase() {
             username VARCHAR(20) NOT NULL UNIQUE,
             name VARCHAR(64) NOT NULL,
             surname VARCHAR(64),
+            password VARCHAR(64) NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
@@ -71,7 +72,6 @@ func initDatabase() {
             UPDATE users SET updated_at = CURRENT_TIMESTAMP
             WHERE id = old.id;
         END;
-end;
     `); err != nil {
 		log.Fatal(err)
 	}
@@ -96,5 +96,14 @@ end;
         END;
     `); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func CloseConnection() {
+	if db != nil {
+		err := db.Close()
+		if err != nil {
+			os.Exit(1)
+		}
 	}
 }
