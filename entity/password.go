@@ -3,9 +3,10 @@ package entity
 import "time"
 
 type Password struct {
-    Username string
-    Password string
-    For      string
-    createAt time.Time
-    UpdateAt time.Time
+	Id        int64
+	ForEntity string
+	Password  string
+	UserId    string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
