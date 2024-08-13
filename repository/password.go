@@ -34,7 +34,7 @@ func (p passwordRepo) GetPassword(id int64) entity.Password {
 	var pass entity.Password
 	scanOneStruct(row, &pass)
 
-	return entity.Password{}
+	return pass
 }
 
 func (p passwordRepo) GetPasswordByForAndUsername(forEntity, username string) entity.Password {
@@ -52,7 +52,7 @@ func (p passwordRepo) GetPasswordByForAndUsername(forEntity, username string) en
 	var pass entity.Password
 	scanOneStruct(row, &pass)
 
-	return entity.Password{}
+	return pass
 }
 
 func (p passwordRepo) ForPasswordsListByUsername(username string) []string {

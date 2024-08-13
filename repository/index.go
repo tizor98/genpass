@@ -55,12 +55,13 @@ func getDb(ctx context.Context) *sql.DB {
 
 func initDatabase() {
 	if _, err := db.Exec(`
-        CREATE TABLE IF NOT EXISTS main.users (
+        CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY, 
             username VARCHAR(20) NOT NULL UNIQUE,
             name VARCHAR(64) NOT NULL,
             surname VARCHAR(64),
             password VARCHAR(64) NOT NULL,
+            active BOOLEAN DEFAULT FALSE,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
