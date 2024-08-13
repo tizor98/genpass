@@ -1,13 +1,15 @@
 package utils
 
-type GeneralFlags byte
+type GeneralData byte
 
 const (
-	GeneralUser = GeneralFlags(iota)
+	GeneralUser = GeneralData(iota)
 )
 
-type NewFlags byte
+type NewCmdData byte
 
 const (
-	NewFlagForEntity = NewFlags(iota)
+	NewArgForEntity = NewCmdData(iota)
+	NewFlagPassType
+	NewFlagPassLength
 )

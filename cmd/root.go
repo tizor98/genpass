@@ -34,6 +34,8 @@ var rootCmd = &cobra.Command{
 	Long: `
 A cli tool to generate and manage passwords for all your services:
 This is a non-profit project and you can use it as you want as long as the licence allow it.
+
+To start try using 'genpass new -t=s' or 'genpass help new' for more info.
 `,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if user, ok := service.IsAuth(); ok {
