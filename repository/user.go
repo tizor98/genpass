@@ -12,7 +12,8 @@ type UserRepo interface {
 	GetUser(id int64) entity.User
 	GetUserByUsername(username string) entity.User
 	ExistByUsername(username string) bool
-	Create(user entity.User) (id int64, err error)
+	Create(user *entity.User) (id int64, err error)
+	GetActive() entity.User
 }
 
 func UserRepository(ctx context.Context) UserRepo {
@@ -29,14 +30,14 @@ func (u *userRepo) GetUser(id int64) entity.User {
 		log.Fatal(err)
 	}
 	defer utils.Close(row, "GetUser")
+
+	var foundUser entity.User
 	if row.Next() {
-		var u entity.User
-		if err := row.Scan(&u.Id, &u.Name, &u.Surname, &u.Username, &u.Password, &u.CreatedAt, &u.UpdatedAt); err != nil {
+		if err := row.Scan(&foundUser.Id, &foundUser.Name, &foundUser.Surname, &foundUser.Username, &foundUser.Password, &foundUser.CreatedAt, &foundUser.UpdatedAt); err != nil {
 			log.Fatal(err)
 		}
-		return u
 	}
-	return entity.User{}
+	return foundUser
 }
 
 func (u *userRepo) GetUserByUsername(username string) entity.User {
@@ -70,7 +71,7 @@ func (u *userRepo) ExistByUsername(username string) bool {
 	return false
 }
 
-func (u *userRepo) Create(user entity.User) (id int64, err error) {
+func (u *userRepo) Create(user *entity.User) (id int64, err error) {
 	result, err := u.db.Exec(`
         INSERT INTO users (username, name, surname, password) VALUES (?, ?, ?, ?)
         `, user.Username, user.Name, user.Surname, user.Password)
@@ -79,4 +80,17 @@ func (u *userRepo) Create(user entity.User) (id int64, err error) {
 		log.Fatal(err)
 	}
 	return result.LastInsertId()
+}
+
+func (u *userRepo) GetActive() entity.User {
+	row, err := u.db.Query("SELECT * FROM users WHERE active = true")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer utils.Close(row, "GetUserByUsername")
+
+	var user entity.User
+	scanOneStruct(row, &user)
+
+	return user
 }

@@ -8,6 +8,7 @@ type User struct {
 	Name      string
 	Surname   string
 	Password  string
+	Active    bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
