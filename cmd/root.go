@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"github.com/tizor98/genpass/cmd/user"
 	"github.com/tizor98/genpass/service"
 	"github.com/tizor98/genpass/utils"
@@ -39,7 +38,7 @@ To start try using 'genpass new -t=s' or 'genpass help new' for more info.
 `,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if user, ok := service.IsAuth(); ok {
-			fmt.Println("User found")
+			cmd.Println("Using user:", user.Surname)
 			cmd.SetContext(context.WithValue(cmd.Context(), utils.GeneralUser, user))
 		}
 	},
@@ -57,7 +56,6 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(user.Cmd)
 	rootCmd.AddCommand(newCmd)
-	rootCmd.AddCommand(lsCmd)
 	rootCmd.AddCommand(getCmd)
 
 	// Here you will define your flags and configuration settings.

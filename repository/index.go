@@ -58,10 +58,8 @@ func initDatabase() {
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY, 
             username VARCHAR(20) NOT NULL UNIQUE,
-            name VARCHAR(64) NOT NULL,
-            surname VARCHAR(64),
             password VARCHAR(64) NOT NULL,
-            active BOOLEAN DEFAULT FALSE,
+            is_active BOOLEAN DEFAULT FALSE,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );

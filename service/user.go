@@ -17,3 +17,12 @@ func SaveNewPassword(password, forEntity string, user *entity.User) {
 
 	log.Printf("Password created %d for entity %s", passId, forEntity)
 }
+
+func GetUsers() map[string]bool {
+	ur := repository.UserRepository(context.Background())
+	return ur.ListUsersNames()
+}
+
+func SetActive(username string) {
+	ur := repository.UserRepository(context.Background())
+}

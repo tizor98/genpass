@@ -4,22 +4,31 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package user
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"github.com/tizor98/genpass/entity"
+	"github.com/tizor98/genpass/service"
+)
+
+var (
+	noActivate *bool
 )
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add a new user",
+	Long:  `Add a new user, and by default set it as the current active user.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+
+		user := new(entity.User)
+		if noActivate != nil && !*noActivate {
+			service.SetActive(user.Username)
+			cmd.Printf("Username %s is now set as the current active user.\n", user.Username)
+		}
 	},
+}
+
+func init() {
+
+	noActivate = addCmd.Flags().BoolP("no-activate", "n", false, "Indicate if new user is set as the current active user")
 }

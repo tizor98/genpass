@@ -14,6 +14,8 @@ type UserRepo interface {
 	ExistByUsername(username string) bool
 	Create(user *entity.User) (id int64, err error)
 	GetActive() entity.User
+	SetActive(username string)
+	ListUsersNames() map[string]bool
 }
 
 func UserRepository(ctx context.Context) UserRepo {
@@ -22,6 +24,26 @@ func UserRepository(ctx context.Context) UserRepo {
 
 type userRepo struct {
 	db *sql.DB
+}
+
+func (u *userRepo) ListUsersNames() map[string]bool {
+	rows, err := u.db.Query("SELECT username, is_active FROM users")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer utils.Close(rows, "ListUsersNames")
+
+	output := make(map[string]bool)
+	for rows.Next() {
+		var userName string
+		var isActive bool
+		if err = rows.Scan(&userName, &isActive); err != nil {
+			log.Fatal(err)
+		}
+		output[userName] = isActive
+	}
+
+	return output
 }
 
 func (u *userRepo) GetUser(id int64) entity.User {
@@ -83,7 +105,7 @@ func (u *userRepo) Create(user *entity.User) (id int64, err error) {
 }
 
 func (u *userRepo) GetActive() entity.User {
-	row, err := u.db.Query("SELECT * FROM users WHERE active = true")
+	row, err := u.db.Query("SELECT * FROM users WHERE is_active = true")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,4 +115,15 @@ func (u *userRepo) GetActive() entity.User {
 	scanOneStruct(row, &user)
 
 	return user
+}
+
+func (u *userRepo) SetActive(username string) {
+	_, err := u.db.Exec("UPDATE users SET is_active = false WHERE is_active = true")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = u.db.Exec("UPDATE users SET is_active = true WHERE username = ?", username)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

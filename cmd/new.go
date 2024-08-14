@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/tizor98/genpass/service"
 	"github.com/tizor98/genpass/utils"
@@ -20,15 +19,14 @@ var newCmd = &cobra.Command{
 If you have setup a user. You can optionally specified an entity for which the password must be generated.
 The new password will be associate with the entity and the user in encrypted form for further consult.
 
-Example: genpass new -t=n -l=30 www.google.com - Will generate a 30 length password containing capital letters, lower letters and numbers.
+Example: genpass new -t n -l 30 www.google.com - Will generate a 30 length password containing capital letters, lower letters and numbers.
 And in case there is a user setup, will save the generated password for www.google.com entity.
-
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
 		if len(args) > 0 {
 			if nil == ctx.Value(utils.GeneralUser) {
-				fmt.Println("ERROR: If you specified an entity, you must setup first a user. Try 'genpass help user' for more info")
+				cmd.PrintErr("ERROR: If you specified an entity, you must setup first a user. Try 'genpass help user' for more info")
 				return
 			}
 
@@ -53,7 +51,7 @@ And in case there is a user setup, will save the generated password for www.goog
 		}
 
 		pass := service.NewPassword(ctx)
-		fmt.Println(pass)
+		cmd.Println(pass)
 	},
 }
 
