@@ -55,7 +55,7 @@ func (u *userRepo) GetUser(id int64) entity.User {
 
 	var foundUser entity.User
 	if row.Next() {
-		if err := row.Scan(&foundUser.Id, &foundUser.Name, &foundUser.Surname, &foundUser.Username, &foundUser.Password, &foundUser.CreatedAt, &foundUser.UpdatedAt); err != nil {
+		if err := row.Scan(&foundUser.Id, &foundUser.Username, &foundUser.Password, &foundUser.IsActive, &foundUser.CreatedAt, &foundUser.UpdatedAt); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -95,8 +95,8 @@ func (u *userRepo) ExistByUsername(username string) bool {
 
 func (u *userRepo) Create(user *entity.User) (id int64, err error) {
 	result, err := u.db.Exec(`
-        INSERT INTO users (username, name, surname, password) VALUES (?, ?, ?, ?)
-        `, user.Username, user.Name, user.Surname, user.Password)
+        INSERT INTO users (username, password) VALUES (?, ?)
+        `, user.Username, user.Password)
 
 	if err != nil {
 		log.Fatal(err)

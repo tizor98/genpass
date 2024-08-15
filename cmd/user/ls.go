@@ -39,6 +39,3 @@ or 'genpass user "username"' to setup an active user for which password will be 
 		tb.Print()
 	},
 }
-
-func init() {
-}

@@ -38,7 +38,6 @@ To start try using 'genpass new -t=s' or 'genpass help new' for more info.
 `,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if user, ok := service.IsAuth(); ok {
-			cmd.Println("Using user:", user.Surname)
 			cmd.SetContext(context.WithValue(cmd.Context(), utils.GeneralUser, user))
 		}
 	},

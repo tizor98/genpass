@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tizor98/genpass/service"
 	"github.com/tizor98/genpass/utils"
+	"os"
 )
 
 var (
@@ -26,8 +27,8 @@ And in case there is a user setup, will save the generated password for www.goog
 		ctx := cmd.Context()
 		if len(args) > 0 {
 			if nil == ctx.Value(utils.GeneralUser) {
-				cmd.PrintErr("ERROR: If you specified an entity, you must setup first a user. Try 'genpass help user' for more info")
-				return
+				cmd.PrintErr("Error: If you specified an entity, you must setup first a user. Try 'genpass help user' for more info")
+				os.Exit(1)
 			}
 
 			ctx = context.WithValue(ctx, utils.NewArgForEntity, args[0])
