@@ -14,8 +14,8 @@ func Encrypt(target string) string {
 	return string(encryptData)
 }
 
-func Compare(target, source string) bool {
-	if err := bcrypt.CompareHashAndPassword([]byte(target), []byte(source)); err != nil {
+func Compare(encryptedStr, plaintStr string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(encryptedStr), []byte(plaintStr)); err != nil {
 		return false
 	}
 	return true

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/tizor98/genpass/entity"
 	"github.com/tizor98/genpass/utils"
 	"log"
@@ -16,6 +17,7 @@ type UserRepo interface {
 	GetActive() entity.User
 	SetActive(username string)
 	ListUsersNames() map[string]bool
+	Delete(username string) error
 }
 
 func UserRepository(ctx context.Context) UserRepo {
@@ -24,6 +26,18 @@ func UserRepository(ctx context.Context) UserRepo {
 
 type userRepo struct {
 	db *sql.DB
+}
+
+func (u *userRepo) Delete(username string) error {
+	result, err := u.db.Exec("DELETE FROM users WHERE username = ?", username)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if rows != 1 {
+		return errors.New("user not found")
+	}
 }
 
 func (u *userRepo) ListUsersNames() map[string]bool {

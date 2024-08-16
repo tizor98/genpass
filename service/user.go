@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/tizor98/genpass/entity"
 	"github.com/tizor98/genpass/repository"
 	"github.com/tizor98/genpass/utils"
@@ -41,4 +42,18 @@ func NewUser(username, password string) entity.User {
 	}
 
 	return ur.GetUser(userId)
+}
+
+func RemoveUser(username, pass string) error {
+	ur := repository.UserRepository(context.Background())
+	user := ur.GetUserByUsername(username)
+	if user.Id == 0 {
+		return errors.New("user not found")
+	}
+
+	if ok := utils.Compare(user.Password, pass); !ok {
+		return errors.New("wrong password")
+	}
+
+	return ur.Delete(user.Username)
 }
