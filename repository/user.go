@@ -38,6 +38,8 @@ func (u *userRepo) Delete(username string) error {
 	if rows != 1 {
 		return errors.New("user not found")
 	}
+
+	return nil
 }
 
 func (u *userRepo) ListUsersNames() map[string]bool {
