@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package user
 
 import (
@@ -11,7 +8,6 @@ import (
 	"syscall"
 )
 
-// addCmd represents the add command
 var rmCmd = &cobra.Command{
 	Use:   "rm",
 	Short: "Delete user",
@@ -28,8 +24,9 @@ If the user is the current active user. You should indicate the new active user 
 
 		cmd.Print("Enter the user password: ")
 		bt, err := term.ReadPassword(int(syscall.Stdin))
+		cmd.Print("\n")
 		if err != nil {
-			cmd.PrintErr("An unexpected error happened.")
+			cmd.PrintErrln("An unexpected error happened.")
 			os.Exit(1)
 		}
 
@@ -38,8 +35,9 @@ If the user is the current active user. You should indicate the new active user 
 		err = service.RemoveUser(username, pass)
 		if err != nil {
 			cmd.PrintErrf("Error: %v\n", err)
+			os.Exit(1)
 		}
 
-		cmd.Print("\n\nUser remove successfully!!")
+		cmd.Print("\nUser remove successfully!!\n")
 	},
 }

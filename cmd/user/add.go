@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package user
 
 import (
@@ -17,7 +14,6 @@ var (
 	noActivate *bool
 )
 
-// addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a new user",
@@ -35,7 +31,7 @@ var addCmd = &cobra.Command{
 			cmd.Print("Enter the new username: ")
 			name, err := bufio.NewReader(os.Stdin).ReadString('\n')
 			if err != nil {
-				cmd.PrintErr("An unexpected error happened.")
+				cmd.PrintErrln("An unexpected error happened.")
 				os.Exit(1)
 			}
 			username = name
@@ -49,26 +45,36 @@ var addCmd = &cobra.Command{
 		cmd.Print("Enter password for new user: ")
 		bt, err := term.ReadPassword(int(syscall.Stdin))
 		if err != nil {
-			cmd.PrintErr("An unexpected error happened.")
+			cmd.PrintErrln("An unexpected error happened.")
 			os.Exit(1)
 		}
 
 		pass := string(bt)
 		if len(pass) >= 64 {
-			cmd.PrintErr("Error: The password must be less than 64 characters.")
+			cmd.PrintErrln("Error: The password must be less than 64 characters.")
 			os.Exit(1)
 		}
 
 		username = strings.TrimSpace(strings.Trim(username, "\n"))
 		pass = strings.TrimSpace(strings.Trim(pass, "\n"))
 
-		user := service.NewUser(username, pass)
+		cmd.Printf("\n")
 
-		cmd.Print("\n\nUser created successfully!!")
+		user, err := service.NewUser(username, pass)
+		if err != nil {
+			cmd.PrintErrf("Error: %s.\n", err.Error())
+			os.Exit(1)
+		}
+
+		cmd.Print("\nUser created successfully!!\n")
 
 		if noActivate != nil && !*noActivate {
-			service.SetActive(user.Username)
-			cmd.Printf("\n\n%s is now set as the current active user.\n", user.Username)
+			err := service.SetActive(user.Username, pass)
+			if err != nil {
+				cmd.PrintErrf("Error: %s.\n", err.Error())
+				os.Exit(1)
+			}
+			cmd.Printf("\n%s is now set as the current active user.\n", user.Username)
 		}
 	},
 }

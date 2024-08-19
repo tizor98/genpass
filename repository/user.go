@@ -16,6 +16,7 @@ type UserRepo interface {
 	Create(user *entity.User) (id int64, err error)
 	GetActive() entity.User
 	SetActive(username string)
+	SetNonActive(username string)
 	ListUsersNames() map[string]bool
 	Delete(username string) error
 }
@@ -139,6 +140,13 @@ func (u *userRepo) SetActive(username string) {
 		log.Fatal(err)
 	}
 	_, err = u.db.Exec("UPDATE users SET is_active = true WHERE username = ?", username)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (u *userRepo) SetNonActive(username string) {
+	_, err := u.db.Exec("UPDATE users SET is_active = false WHERE username = ?", username)
 	if err != nil {
 		log.Fatal(err)
 	}

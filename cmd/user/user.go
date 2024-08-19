@@ -1,25 +1,71 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package user
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/tizor98/genpass/service"
+	"golang.org/x/term"
+	"os"
+	"syscall"
 )
 
-// userCmd represents the user command
+var (
+	deactivate *bool
+)
+
 var Cmd = &cobra.Command{
 	Use:   "user",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Select an active user or get the current user",
+	Long: `Select an active user passing the username as 'genpass user "user1"'
+Or get the current user without any args as 'genpass user'".
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Optionally you can also deactivate a user passing -d flag like 'genpass user -d "user1"'. This flag only works when a username is passed.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("user called")
+		if len(args) > 1 {
+			cmd.PrintErrln("Error: You must specify at most one username.")
+			os.Exit(1)
+		}
+
+		if len(args) == 0 {
+			user := service.GetActive()
+
+			if user.Id == 0 {
+				cmd.PrintErrln("There is no active user. You can select an active user passing a username. Or first create a user if there are no users created using. Type 'genpass user help add' for more info.")
+				os.Exit(0)
+			}
+
+			cmd.Printf("Active user: %s\n", user.Username)
+			os.Exit(0)
+		}
+
+		username := args[0]
+
+		cmd.Print("Enter the user password: ")
+		bt, err := term.ReadPassword(int(syscall.Stdin))
+		cmd.Print("\n")
+		if err != nil {
+			cmd.PrintErrln("An unexpected error happened.")
+			os.Exit(1)
+		}
+
+		pass := string(bt)
+
+		if deactivate != nil && *deactivate {
+			err = service.SetNonActive(username, pass)
+			if err != nil {
+				cmd.PrintErrf("Error: %v\n", err)
+				os.Exit(1)
+			}
+
+			cmd.Printf("User is set to non active state: %s\n", username)
+		} else {
+			err = service.SetActive(username, pass)
+			if err != nil {
+				cmd.PrintErrf("Error: %v\n", err)
+				os.Exit(1)
+			}
+
+			cmd.Printf("Active user: %s\n", username)
+		}
 	},
 }
 
@@ -28,13 +74,5 @@ func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(rmCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// userCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// userCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	deactivate = Cmd.Flags().BoolP("deactivate", "d", false, "Indicate if username must be deactivated")
 }

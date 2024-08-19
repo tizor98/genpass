@@ -1,6 +1,3 @@
-/*
-Package user
-*/
 package user
 
 import (
@@ -15,7 +12,6 @@ const (
 	isActiveText   = "Yes"
 )
 
-// lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all users.",
