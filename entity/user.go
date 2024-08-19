@@ -5,10 +5,8 @@ import "time"
 type User struct {
 	Id        int64
 	Username  string
-	Name      string
-	Surname   string
 	Password  string
-	Active    bool
+	IsActive  bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

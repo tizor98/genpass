@@ -14,6 +14,7 @@ type PasswordRepo interface {
 	ForPasswordsListByUsername(username string) []string
 	ExistsPasswordForEntity(forEntity, username string) bool
 	Create(password, forEntity string, userId int64) (int64, error)
+	DeleteByUsername(username string) error
 }
 
 func PasswordRepository(ctx context.Context) PasswordRepo {
@@ -22,6 +23,11 @@ func PasswordRepository(ctx context.Context) PasswordRepo {
 
 type passwordRepo struct {
 	db *sql.DB
+}
+
+func (p passwordRepo) DeleteByUsername(username string) error {
+	_, err := p.db.Exec("DELETE FROM passwords WHERE userId = (SELECT id FROM users WHERE username = ?)", username)
+	return err
 }
 
 func (p passwordRepo) GetPassword(id int64) entity.Password {
