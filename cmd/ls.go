@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get a password for the active user",
-	Long:  `Get a password for the active user.`,
+var lsCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "List all passwords for the active user",
+	Long:  `List all passwords for the active user.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		AskForPassword(cmd)
 	},
@@ -24,20 +24,22 @@ var getCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if len(args) != 1 {
-			cmd.PrintErrln("Error: you must specified an entity to retrieved the password.")
+		if len(args) > 0 {
+			cmd.PrintErrln("Error: ls command does not accept any arguments.")
 			os.Exit(1)
 		}
 
 		userPass := cmd.Context().Value(utils.GeneralPassword).(string)
-		forEntity := args[0]
 
-		pass, err := service.GetPassword(forEntity, user.(*entity.User).Username, userPass)
-		if err != nil {
-			cmd.PrintErrln(err)
+		passList := service.GetAllPasswords(user.(*entity.User).Username, userPass)
+		if len(passList) == 0 {
+			cmd.PrintErrln("Error: There are no passwords for the user.")
 			os.Exit(1)
 		}
 
-		cmd.Println(pass)
+		cmd.Printf("\nThere are %v passwords:\n", len(passList))
+		for _, pass := range passList {
+			cmd.Println(pass)
+		}
 	},
 }

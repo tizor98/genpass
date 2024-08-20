@@ -15,15 +15,6 @@ var (
 	ErrUserExists    = errors.New("user already exists")
 )
 
-func SaveNewPassword(password, forEntity string, user *entity.User) {
-	pr := repository.PasswordRepository(context.Background())
-
-	_, err := pr.Create(password, forEntity, user.Id)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func GetUsers() map[string]bool {
 	ur := repository.UserRepository(context.Background())
 	return ur.ListUsersNames()
@@ -100,5 +91,12 @@ func SetNonActive(username, pass string) error {
 		return ErrWrongPassword
 	}
 	ur.SetNonActive(username)
+	return nil
+}
+
+func VerifyUserPassword(pass, encryptedPass string) error {
+	if ok := utils.Compare(encryptedPass, pass); !ok {
+		return ErrWrongPassword
+	}
 	return nil
 }

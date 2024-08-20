@@ -26,7 +26,7 @@ type passwordRepo struct {
 }
 
 func (p passwordRepo) DeleteByUsername(username string) error {
-	_, err := p.db.Exec("DELETE FROM passwords WHERE userId = (SELECT id FROM users WHERE username = ?)", username)
+	_, err := p.db.Exec("DELETE FROM passwords WHERE user_id = (SELECT id FROM users WHERE username = ?)", username)
 	return err
 }
 
@@ -47,7 +47,7 @@ func (p passwordRepo) GetPasswordByForAndUsername(forEntity, username string) en
 	row, err := p.db.Query(`
 		SELECT p.* 
 		FROM passwords p 
-		    JOIN main.users u ON u.id = p.userId 
+		    JOIN main.users u ON u.id = p.user_id 
 		WHERE u.username = ? AND p.for_entity = ?
 		`, username, forEntity)
 	if err != nil {
@@ -65,7 +65,7 @@ func (p passwordRepo) ForPasswordsListByUsername(username string) []string {
 	row, err := p.db.Query(`
 		SELECT for_entity 
 		FROM passwords p 
-		    JOIN main.users u ON u.id = p.userId 
+		    JOIN main.users u ON u.id = p.user_id 
 		WHERE u.username = ?
 		`, username)
 	if err != nil {
@@ -74,7 +74,7 @@ func (p passwordRepo) ForPasswordsListByUsername(username string) []string {
 	defer utils.Close(row, "ForPasswordsListByUsername")
 
 	forEntities := make([]string, 0)
-	if row.Next() {
+	for row.Next() {
 		var forEntity string
 		if err := row.Scan(&forEntity); err != nil {
 			log.Fatal(err)
@@ -88,7 +88,7 @@ func (p passwordRepo) ExistsPasswordForEntity(forEntity, username string) bool {
 	row, err := p.db.Query(`
 		SELECT COUNT(*) 
 		FROM passwords p 
-		    JOIN main.users u ON u.id = p.userId 
+		    JOIN main.users u ON u.id = p.user_id 
 		WHERE u.username = ? AND p.for_entity = ?
 		`, username, forEntity)
 	if err != nil {
@@ -107,7 +107,7 @@ func (p passwordRepo) ExistsPasswordForEntity(forEntity, username string) bool {
 
 func (p passwordRepo) Create(password, forEntity string, userId int64) (int64, error) {
 	result, err := p.db.Exec(`
-		INSERT INTO passwords (userId, password, for_entity) VALUES (?, ?, ?);
+		INSERT INTO passwords (user_id, password, for_entity) VALUES (?, ?, ?);
 		`, userId, password, forEntity)
 	if err != nil {
 		log.Fatal(err)

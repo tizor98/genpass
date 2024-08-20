@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"github.com/spf13/cobra"
+	"github.com/tizor98/genpass/entity"
 	"github.com/tizor98/genpass/service"
 	"github.com/tizor98/genpass/utils"
 	"os"
@@ -23,6 +24,9 @@ The new password will be associate with the entity and the user in encrypted for
 Example: genpass new -t n -l 30 www.google.com - Will generate a 30 length password containing capital letters, lower letters and numbers.
 And in case there is a user setup, will save the generated password for www.google.com entity.
 `,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		AskForPassword(cmd)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
 		if len(args) > 0 {
@@ -52,6 +56,15 @@ And in case there is a user setup, will save the generated password for www.goog
 		}
 
 		pass := service.NewPassword(ctx)
+
+		user := ctx.Value(utils.GeneralUser)
+		forEntity := ctx.Value(utils.NewArgForEntity)
+
+		if user != nil && forEntity != nil && len(forEntity.(string)) > 0 {
+			userPass := cmd.Context().Value(utils.GeneralPassword).(string)
+			service.SaveNewPassword(pass, forEntity.(string), user.(*entity.User), userPass)
+		}
+
 		cmd.Println(pass)
 	},
 }
