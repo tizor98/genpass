@@ -57,6 +57,7 @@ func AskForPassword(cmd *cobra.Command) {
 	u := cmd.Context().Value(utils.GeneralUser)
 
 	if u == nil || u.(*entity.User).Id == 0 {
+		cmd.SetContext(context.WithValue(cmd.Context(), utils.GeneralPassword, ""))
 		return
 	}
 

@@ -64,6 +64,7 @@ And in case there is a user setup, will save the generated password for www.goog
 
 		if user == nil || forEntity == nil || len(forEntity.(string)) == 0 {
 			cmd.Println(pass)
+			os.Exit(0)
 		}
 
 		userPass := cmd.Context().Value(utils.GeneralPassword).(string)
