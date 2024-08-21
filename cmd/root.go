@@ -79,11 +79,21 @@ func AskForPassword(cmd *cobra.Command) {
 	cmd.SetContext(context.WithValue(cmd.Context(), utils.GeneralPassword, pass))
 }
 
+func EnsureAUserIsActive(cmd *cobra.Command) {
+	u := cmd.Context().Value(utils.GeneralUser)
+
+	if u == nil || u.(*entity.User).Id == 0 {
+		cmd.PrintErrln("Error: You must set an active user first. Type 'genpass help user' to get started.")
+		os.Exit(1)
+	}
+}
+
 func init() {
 	rootCmd.AddCommand(user.Cmd)
 	rootCmd.AddCommand(newCmd)
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(lsCmd)
+	rootCmd.AddCommand(rmCmd)
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

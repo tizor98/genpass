@@ -7,7 +7,7 @@ import (
 func TestEncryptWithKey(t *testing.T) {
 	fakePass := "fakePass"
 
-	encryptedPass := EncryptWithKey(fakePass, []string{"super-key"})
+	encryptedPass := EncryptWithKeys(fakePass, []string{"super-key"})
 
 	if encryptedPass == fakePass {
 		t.Error("encrypted password is equal to fakePass")
@@ -17,13 +17,13 @@ func TestEncryptWithKey(t *testing.T) {
 func TestDecryptWithKey(t *testing.T) {
 	fakePass := "fakePass"
 
-	encryptedPass := EncryptWithKey(fakePass, []string{"super-key"})
+	encryptedPass := EncryptWithKeys(fakePass, []string{"super-key"})
 
 	if encryptedPass == fakePass {
 		t.Error("encrypted password is equal to fakePass")
 	}
 
-	initialPass := DecryptWithKey(encryptedPass, []string{"super-key"})
+	initialPass := DecryptWithKeys(encryptedPass, []string{"super-key"})
 
 	if initialPass != fakePass {
 		t.Error("decrypted password is not equal to fakePass")

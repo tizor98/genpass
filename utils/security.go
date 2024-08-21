@@ -27,7 +27,7 @@ func Compare(encryptedStr, plaintStr string) bool {
 	return true
 }
 
-func EncryptWithKey(target string, keys []string) string {
+func EncryptWithKeys(target string, keys ...string) string {
 	var sb strings.Builder
 
 	for _, key := range keys {
@@ -51,7 +51,7 @@ func EncryptWithKey(target string, keys []string) string {
 	return base64.StdEncoding.EncodeToString(output)
 }
 
-func DecryptWithKey(target string, keys []string) string {
+func DecryptWithKeys(target string, keys ...string) string {
 	var sb strings.Builder
 
 	for _, key := range keys {

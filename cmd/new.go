@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"github.com/spf13/cobra"
 	"github.com/tizor98/genpass/entity"
 	"github.com/tizor98/genpass/service"
 	"github.com/tizor98/genpass/utils"
 	"os"
+	"strings"
 )
 
 var (
@@ -60,25 +62,37 @@ And in case there is a user setup, will save the generated password for www.goog
 		user := ctx.Value(utils.GeneralUser)
 		forEntity := ctx.Value(utils.NewArgForEntity)
 
-		if user != nil && forEntity != nil && len(forEntity.(string)) > 0 {
-			userPass := cmd.Context().Value(utils.GeneralPassword).(string)
-			service.SaveNewPassword(pass, forEntity.(string), user.(*entity.User), userPass)
+		if user == nil || forEntity == nil || len(forEntity.(string)) == 0 {
+			cmd.Println(pass)
 		}
 
+		userPass := cmd.Context().Value(utils.GeneralPassword).(string)
+
+		if hasOne := service.HasPassword(forEntity.(string), user.(*entity.User).Username, userPass); !hasOne {
+			service.SaveNewPassword(pass, forEntity.(string), user.(*entity.User), userPass)
+			cmd.Println(pass)
+			os.Exit(0)
+		}
+
+		var decision string
+
+		cmd.Printf("It already exists a password for %s. Are you sure you want to replace it? (Y/n): ", forEntity)
+		decision, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		if err != nil {
+			cmd.PrintErrln("An unexpected error happened.")
+			os.Exit(1)
+		}
+
+		decision = strings.TrimSpace(decision)
+		if decision != "" && strings.ToLower(decision) != "y" {
+			os.Exit(0)
+		}
+		service.UpdatePassword(pass, forEntity.(string), user.(*entity.User), userPass)
 		cmd.Println(pass)
 	},
 }
 
 func init() {
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// newCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	passType = newCmd.Flags().StringP("type", "t", "a", "Indicate the password type to generate. Options: a=All, s=Cap and lower letters, n=Same as s but with numbers.")
 	passLength = newCmd.Flags().IntP("length", "l", 20, "Indicate the length of the password")
 }

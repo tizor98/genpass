@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get a password for the active user",
-	Long:  `Get a password for the active user. Example 'genpass get www.google.com'`,
+var rmCmd = &cobra.Command{
+	Use:   "rm",
+	Short: "Remove a password for the active user",
+	Long:  `Remove a password for the active user. Example: 'genpass rm www.google.com' will remove the password saved for google if exists.`,
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		EnsureAUserIsActive(cmd)
@@ -23,12 +23,12 @@ var getCmd = &cobra.Command{
 		userPass := cmd.Context().Value(utils.GeneralPassword).(string)
 		forEntity := args[0]
 
-		pass, err := service.GetPassword(forEntity, user.Username, userPass)
+		err := service.DeletePassword(forEntity, user.Username, userPass)
 		if err != nil {
 			cmd.PrintErrln(err)
 			os.Exit(1)
 		}
 
-		cmd.Println(pass)
+		cmd.Printf("Password for %s deleted successfully.\n", forEntity)
 	},
 }

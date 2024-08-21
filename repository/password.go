@@ -15,6 +15,8 @@ type PasswordRepo interface {
 	ExistsPasswordForEntity(forEntity, username string) bool
 	Create(password, forEntity string, userId int64) (int64, error)
 	DeleteByUsername(username string) error
+	Delete(id int64) error
+	Update(password, forEntity string, userId int64) error
 }
 
 func PasswordRepository(ctx context.Context) PasswordRepo {
@@ -23,6 +25,18 @@ func PasswordRepository(ctx context.Context) PasswordRepo {
 
 type passwordRepo struct {
 	db *sql.DB
+}
+
+func (p passwordRepo) Delete(id int64) error {
+	_, err := p.db.Exec("DELETE FROM passwords WHERE id = ?", id)
+	return err
+}
+
+func (p passwordRepo) Update(password, forEntity string, userId int64) error {
+	_, err := p.db.Exec(`
+		UPDATE passwords SET password = ? WHERE for_entity = ? AND user_id = ?;
+		`, password, forEntity, userId)
+	return err
 }
 
 func (p passwordRepo) DeleteByUsername(username string) error {
