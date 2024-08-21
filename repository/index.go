@@ -80,10 +80,10 @@ func initDatabase() {
             id INTEGER PRIMARY KEY,
             for_entity VARCHAR NOT NULL,
             password VARCHAR NOT NULL,
-            userId INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(userId) REFERENCES users(id)
+            FOREIGN KEY(user_id) REFERENCES users(id)
         );
 
         CREATE TRIGGER IF NOT EXISTS update_passwords_updated_at

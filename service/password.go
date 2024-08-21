@@ -2,9 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/tizor98/genpass/entity"
+	"github.com/tizor98/genpass/repository"
 	"github.com/tizor98/genpass/utils"
+	"log"
 	"math/rand/v2"
+	"slices"
 	"strings"
 )
 
@@ -24,6 +28,36 @@ var (
 	PasswordLength    = 20
 )
 
+var (
+	ErrPasswordNotFound = errors.New("password not found")
+)
+
+func GetPassword(forEntity, username, userPass string) (string, error) {
+	pr := repository.PasswordRepository(context.Background())
+
+	encryptedForEntity := utils.EncryptWithKeys(forEntity, userPass)
+	pass := pr.GetPasswordByForAndUsername(encryptedForEntity, username)
+
+	if pass.Id == 0 || pass.Password == "" {
+		return "", ErrPasswordNotFound
+	}
+
+	password := utils.DecryptWithKeys(pass.Password, forEntity, username)
+	return password, nil
+}
+
+func SaveNewPassword(pass, forEntity string, user *entity.User, userPass string) {
+	pr := repository.PasswordRepository(context.Background())
+
+	password := utils.EncryptWithKeys(pass, forEntity, user.Username)
+	encryptedForEntity := utils.EncryptWithKeys(forEntity, userPass)
+
+	_, err := pr.Create(password, encryptedForEntity, user.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func NewPassword(ctx context.Context) string {
 	length := ctx.Value(utils.NewFlagPassLength)
 	if length != nil {
@@ -33,15 +67,7 @@ func NewPassword(ctx context.Context) string {
 	mode := ctx.Value(utils.NewFlagPassType).(PassType)
 	source := getSource(mode)
 
-	pass := generatePassword(PasswordLength, source)
-
-	user := ctx.Value(utils.GeneralUser)
-	forEntity := ctx.Value(utils.NewArgForEntity)
-
-	if user != nil && forEntity != nil && len(forEntity.(string)) > 0 {
-		SaveNewPassword(pass, forEntity.(string), user.(*entity.User))
-	}
-	return pass
+	return generatePassword(PasswordLength, source)
 }
 
 func generatePassword(length int, source []byte) string {
@@ -76,4 +102,46 @@ func getSource(mode PassType) []byte {
 		break
 	}
 	return source
+}
+
+func GetAllPasswords(username string, userPass string) []string {
+	pr := repository.PasswordRepository(context.Background())
+	forEntitySlice := pr.ForPasswordsListByUsername(username)
+
+	for i, forEntity := range forEntitySlice {
+		forEntitySlice[i] = utils.DecryptWithKeys(forEntity, userPass)
+	}
+
+	slices.Sort(forEntitySlice)
+	return forEntitySlice
+}
+
+func HasPassword(forEntity, username, userPass string) bool {
+	pr := repository.PasswordRepository(context.Background())
+	encryptedForEntity := utils.EncryptWithKeys(forEntity, userPass)
+	return pr.ExistsPasswordForEntity(encryptedForEntity, username)
+}
+
+func UpdatePassword(pass, forEntity string, user *entity.User, userPass string) {
+	pr := repository.PasswordRepository(context.Background())
+
+	password := utils.EncryptWithKeys(pass, forEntity, user.Username)
+	encryptedForEntity := utils.EncryptWithKeys(forEntity, userPass)
+
+	err := pr.Update(password, encryptedForEntity, user.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func DeletePassword(forEntity, username, userPass string) error {
+	pr := repository.PasswordRepository(context.Background())
+
+	encryptedForEntity := utils.EncryptWithKeys(forEntity, userPass)
+
+	passToDelete := pr.GetPasswordByForAndUsername(encryptedForEntity, username)
+	if passToDelete.Id == 0 {
+		return ErrPasswordNotFound
+	}
+	return pr.Delete(passToDelete.Id)
 }

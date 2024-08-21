@@ -4,6 +4,7 @@ type GeneralData byte
 
 const (
 	GeneralUser = GeneralData(iota)
+	GeneralPassword
 )
 
 type NewCmdData byte

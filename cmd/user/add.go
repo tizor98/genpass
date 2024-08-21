@@ -18,12 +18,8 @@ var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a new user",
 	Long:  `Add a new user, and by default set it as the current active user.`,
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 1 {
-			cmd.PrintErrln("Error: Optionally you can enter only the new username.")
-			os.Exit(1)
-		}
-
 		var username string
 		if len(args) == 1 {
 			username = args[0]
@@ -34,7 +30,7 @@ var addCmd = &cobra.Command{
 				cmd.PrintErrln("An unexpected error happened.")
 				os.Exit(1)
 			}
-			username = name
+			username = strings.TrimSpace(name)
 		}
 
 		if len(username) >= 20 {
@@ -54,9 +50,7 @@ var addCmd = &cobra.Command{
 			cmd.PrintErrln("Error: The password must be less than 64 characters.")
 			os.Exit(1)
 		}
-
-		username = strings.TrimSpace(strings.Trim(username, "\n"))
-		pass = strings.TrimSpace(strings.Trim(pass, "\n"))
+		pass = strings.TrimSpace(pass)
 
 		cmd.Printf("\n")
 

@@ -2,7 +2,9 @@ package user
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/tizor98/genpass/entity"
 	"github.com/tizor98/genpass/service"
+	"github.com/tizor98/genpass/utils"
 	"golang.org/x/term"
 	"os"
 	"syscall"
@@ -19,21 +21,17 @@ var Cmd = &cobra.Command{
 Or get the current user without any args as 'genpass user'".
 
 Optionally you can also deactivate a user passing -d flag like 'genpass user -d "user1"'. This flag only works when a username is passed.`,
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 1 {
-			cmd.PrintErrln("Error: You must specify at most one username.")
-			os.Exit(1)
-		}
-
 		if len(args) == 0 {
-			user := service.GetActive()
+			user := cmd.Context().Value(utils.GeneralUser)
 
-			if user.Id == 0 {
+			if user == nil || user.(*entity.User).Id == 0 {
 				cmd.PrintErrln("There is no active user. You can select an active user passing a username. Or first create a user if there are no users created using. Type 'genpass user help add' for more info.")
 				os.Exit(0)
 			}
 
-			cmd.Printf("Active user: %s\n", user.Username)
+			cmd.Printf("Active user: %s\n", user.(*entity.User).Username)
 			os.Exit(0)
 		}
 

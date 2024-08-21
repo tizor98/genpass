@@ -18,15 +18,16 @@ package cmd
 
 import (
 	"context"
+	"github.com/spf13/cobra"
 	"github.com/tizor98/genpass/cmd/user"
+	"github.com/tizor98/genpass/entity"
 	"github.com/tizor98/genpass/service"
 	"github.com/tizor98/genpass/utils"
+	"golang.org/x/term"
 	"os"
-
-	"github.com/spf13/cobra"
+	"syscall"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "genpass",
 	Short: "Passwords generator and management system",
@@ -52,18 +53,47 @@ func Execute() {
 	}
 }
 
+func AskForPassword(cmd *cobra.Command) {
+	u := cmd.Context().Value(utils.GeneralUser)
+
+	if u == nil || u.(*entity.User).Id == 0 {
+		return
+	}
+
+	cmd.Print("Enter the user password: ")
+	bt, err := term.ReadPassword(int(syscall.Stdin))
+	cmd.Print("\n")
+	if err != nil {
+		cmd.PrintErrln("An unexpected error happened.")
+		os.Exit(1)
+	}
+
+	pass := string(bt)
+
+	err = service.VerifyUserPassword(pass, u.(*entity.User).Password)
+	if err != nil {
+		cmd.PrintErrf("Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	cmd.SetContext(context.WithValue(cmd.Context(), utils.GeneralPassword, pass))
+}
+
+func EnsureAUserIsActive(cmd *cobra.Command) {
+	u := cmd.Context().Value(utils.GeneralUser)
+
+	if u == nil || u.(*entity.User).Id == 0 {
+		cmd.PrintErrln("Error: You must set an active user first. Type 'genpass help user' to get started.")
+		os.Exit(1)
+	}
+}
+
 func init() {
 	rootCmd.AddCommand(user.Cmd)
 	rootCmd.AddCommand(newCmd)
 	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(lsCmd)
+	rootCmd.AddCommand(rmCmd)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.genpass.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

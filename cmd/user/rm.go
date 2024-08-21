@@ -14,12 +14,8 @@ var rmCmd = &cobra.Command{
 	Long: `Delete a user, with all the associate passwords.
 
 If the user is the current active user. You should indicate the new active user with 'password user [new active user]' command`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 || args[0] == "" {
-			cmd.PrintErrln("Error: You must specify a username.")
-			os.Exit(1)
-		}
-
 		username := args[0]
 
 		cmd.Print("Enter the user password: ")

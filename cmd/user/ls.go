@@ -19,6 +19,7 @@ var lsCmd = &cobra.Command{
 
 If you don´t have any user registered use 'genpass user add "username"' to registered one
 or 'genpass user "username"' to setup an active user for which password will be saved.`,
+	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		users := service.GetUsers()
 
